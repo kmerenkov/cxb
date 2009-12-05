@@ -1,0 +1,9 @@
+[Gedit Plugin]
+Loader=python
+Module=cxb
+IAge=2
+Name=C-x b
+Description=Quick jumping between open files
+Authors=Konstantin Merenkov <kmerenkov@gmail.com>
+Copyright=Copyright © 2009 Konstantin Merenkov <kmerenkov@gmail.com>
+
