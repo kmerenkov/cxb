@@ -7,16 +7,7 @@ from buffers import BuffersManager
 
 
 GLADE_TEMPLATE_FILE = os.path.dirname(__file__) + "/cxb.glade"
-MENU_TEMPLATE = """<ui>
-<menubar name="MenuBar">
-    <menu name="CXBMenu" action="CXBMenuAction">
-        <placeholder name="CXB Options">
-            <menuitem name="CXB" action="CXBAction"/>
-        </placeholder>
-    </menu>
-</menubar>
-</ui>
-"""
+HOTKEY = gtk.accelerator_parse("<Ctrl>b")
 
 
 class PluginWindow(object):
@@ -27,38 +18,26 @@ class PluginWindow(object):
     text_entry = None
     hit_list = None
     list_model = gtk.ListStore(str, str)
-    action_group = gtk.ActionGroup("CXBPluginActions")
-    menu_action = gtk.Action(name="CXBMenuAction", label="Snap", tooltip="Snap tools", stock_id=None )
-    snapopen_action = gtk.Action(name="CXBAction", label="Switch...\t", tooltip="Switch between buffers", stock_id=gtk.STOCK_OPEN)
-    ui_id = None # ???
     buffer_manager = None
+    accel_group = gtk.AccelGroup()
 
 
     def __init__(self, plugin, gedit_window):
         self.plugin = plugin
         self.gedit_window = gedit_window
         self.buffer_manager = BuffersManager(self.gedit_window)
-        self.init_menu()
+        self.init_hotkeys()
         self.init_glade()
 
     def cleanup(self):
-        self.remove_menu()
+        self.remove_hotkeys()
 
-    def init_menu(self):
-        manager = self.gedit_window.get_ui_manager()
-        self.action_group.add_action(self.menu_action)
-        self.snapopen_action.connect("activate", lambda a: self.on_snapopen_action())
-        self.action_group.add_action_with_accel(self.snapopen_action, "<Ctrl>b" )
-        manager.insert_action_group(self.action_group, 0)
-        self.ui_id = manager.new_merge_id()
-        manager.add_ui_from_string(MENU_TEMPLATE)
-        manager.ensure_update()
+    def init_hotkeys(self):
+        self.accel_group.connect_group(HOTKEY[0], HOTKEY[1], 0, lambda _1, _2, _3, _4: self.on_cxb_action())
+        self.gedit_window.add_accel_group(self.accel_group)
 
-    def remove_menu(self):
-        manager = self.gedit_window.get_ui_manager()
-        manager.remove_ui(self.ui_id)
-        manager.remove_action_group(self.action_group)
-        manager.ensure_update()
+    def remove_hotkeys(self):
+        self.gedit_window.remove_accel_group(self.accel_group)
 
     def init_glade(self):
         self.template = gtk.glade.XML(GLADE_TEMPLATE_FILE)
@@ -117,12 +96,11 @@ class PluginWindow(object):
         _list_store, rows = self.hit_list.get_selection().get_selected_rows()
         if rows:
             doc_idx = rows[0][0]
-            self.buffer_manager.switch_to_buffer_by_index(doc_idx)
             self.text_entry.set_text('')
             self.plugin_window.hide()
+            self.buffer_manager.switch_to_buffer_by_index(doc_idx)
 
-    #on menuitem activation (incl. shortcut)
-    def on_snapopen_action(self):
+    def on_cxb_action(self):
         self.plugin_window.set_title("Switch to a buffer...")
         self.fill_in_results()
         self.plugin_window.show()
