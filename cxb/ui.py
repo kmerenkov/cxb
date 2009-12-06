@@ -31,12 +31,13 @@ class PluginWindow(object):
     menu_action = gtk.Action(name="CXBMenuAction", label="Snap", tooltip="Snap tools", stock_id=None )
     snapopen_action = gtk.Action(name="CXBAction", label="Switch...\t", tooltip="Switch between buffers", stock_id=gtk.STOCK_OPEN)
     ui_id = None # ???
-    buffer_manager = BuffersManager()
+    buffer_manager = None
 
 
     def __init__(self, plugin, gedit_window):
         self.plugin = plugin
         self.gedit_window = gedit_window
+        self.buffer_manager = BuffersManager(self.gedit_window)
         self.init_menu()
         self.init_glade()
 
@@ -97,13 +98,14 @@ class PluginWindow(object):
         self.list_model.clear()
         for doc in documents:
             self.list_model.append(make_row(doc))
+        # select first result by default
+        self.hit_list.get_selection().select_path((0,))
 
     def on_pattern_entry(self, widget, event):
         if event.keyval == gtk.keysyms.Return:
             self.switch_to_buffer(event)
             return
         self.fill_in_results()
-        self.hit_list.get_selection().select_path((0,))
 
     #mouse event on list
     def on_list_mouse(self, widget, event):
@@ -118,7 +120,7 @@ class PluginWindow(object):
         _list_store, rows = self.hit_list.get_selection().get_selected_rows()
         if rows:
             doc_idx = rows[0][0]
-            self.buffer_manager.switch_to_buffer_by_index(self.gedit_window, doc_idx)
+            self.buffer_manager.switch_to_buffer_by_index(doc_idx)
             self.text_entry.set_text('')
             self.plugin_window.hide()
 
