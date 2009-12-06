@@ -71,11 +71,12 @@ class BuffersManager(object):
         found_in_names = [ d for d in docs if match_name(d, pattern) ]
         found_in_uris = [ d for d in docs if (match_uri(d, pattern) and d not in found_in_names) ]
         self._matching_docs = found_in_names + found_in_uris
-        # if there's anything in history, insert it before anything else
-        last_used = self._history.peek()
-        if last_used:
-            if last_used in self._matching_docs:
-                self._matching_docs.remove(last_used)
-            self._matching_docs = [last_used] + self._matching_docs
+        if not pattern:
+            # if there's anything in history, insert it before anything else
+            last_used = self._history.peek()
+            if last_used:
+                if last_used in self._matching_docs:
+                    self._matching_docs.remove(last_used)
+                self._matching_docs = [last_used] + self._matching_docs
         return self._matching_docs
 
