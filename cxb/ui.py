@@ -66,9 +66,6 @@ class PluginWindow(object):
         self.plugin_window = self.template.get_widget("CXBWindow")
         self.plugin_window.connect("key-release-event", self.on_window_key)
         self.plugin_window.set_transient_for(self.gedit_window)
-        # setup buttons
-        self.template.get_widget("ok_button").connect("clicked", self.switch_to_buffer)
-        self.template.get_widget("cancel_button").connect("clicked", lambda a: self.plugin_window.hide())
         #setup entry field
         self.text_entry = self.template.get_widget("entry_name")
         self.text_entry.connect("key-release-event", self.on_pattern_entry)
