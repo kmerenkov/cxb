@@ -58,7 +58,7 @@ class BuffersManager(object):
         return os.path.basename(name) if name else ''
 
     def format_uri(self, uri):
-        return uri.replace(HOME_DIR, "~") if uri else ''
+        return uri.replace(HOME_DIR, "~").replace("file://", "") if uri else ''
 
     def find_matching_buffers(self, pattern):
         def match(data, pattern):
